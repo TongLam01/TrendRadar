@@ -1,0 +1,40 @@
+name: TrendRadar · AI赛道监控
+
+on:
+  schedule:
+    - cron: '0 0,12 * * *'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  pages: write
+  id-token: write
+
+jobs:
+  trendradar:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install dependencies
+        run: |
+          pip install -r requirements.txt
+          pip install deep-translator
+
+      - name: Run TrendRadar
+        run: python -m trendradar
+
+      - name: 免费翻译英文标题
+        run: python translate_rss.py
+
+      - name: Deploy to GitHub Pages
+        uses: peaceiris/actions-gh-pages@v4
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: ./output
+          destination_dir: .
+          keep_files: true
